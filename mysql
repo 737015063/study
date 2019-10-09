@@ -1,1 +1,48 @@
 mysql:简单易用、功能、性能、可靠性
+
+通过对应参数开启功能
+物理文件组成：
+日志文件：错误日志默认关闭可配置路径名称，flush logs可备份
+          二进制日志即bin log  --log-bin指定文件开启，可设置文件大小，针对特定的数据库记录，记录文件绝对路径
+          查询日志体积大开启影响性能，可追踪sql性能
+          慢查询日志记录时间长的sql
+          innodb redo日志 undo保证事务安全
+
+数据文件：.frm文件表结构定义消息
+          .MYD myisam引擎表数据
+          .MYI MYISAM索引相关信息
+          
+          .ibd和ibdata存放innodb数据
+          
+replication相关文件：master.info存在slave记录master信息和日志读取到的位置
+                    relay log 存放io线程从master读取到的bin log ，sql线程解析sql并应用
+                    relay-log.info记录rela log信息
+                    
+其他文件：system config file系统配置文件 如[mysqld]参数项
+         pid file存放进程id
+         socket file
+         
+
+逻辑模块组成(两层)：
+                  sql layer（很多小模块 ）:权限，sql解析，执行优化计划，query cache
+                  storage engine layer 数据存取实现部分
+                  
+sql layer:初始化模块mysql server启动时的初始化操作如buffer和cache结构、系统变量设定、存储引擎设置、内存空间申请
+          核心api模块提供些优化底层操作功能的实现如底层数据结构和算法实现，字符串和数字处理，小文件io，格式化输出，内存管理
+          网络交互模块抽象出模块交互的接口api，实现数据接收与发送
+          client & server交互协议模块自己的信息交互协议建立在 tcp/ip和socket上
+          用户模块登录连接权限控制和授权管理=门卫
+          访问控制模块监控用户动作根据授权和约束控制数据的访问，结合用户模块组成权限安全管理
+          连接管理&连接线程和线程管理：连接管理模块监听接收请求，转发给线程管理模块线程创建和线程的cache，线程处理请求传递结果
+          query解析和转发模块解析语义和语法，进行分类并转发
+          query cache模块cache query类的请求根据query hash值，数据变化后失效，读写比例高用处大
+          query优化器模块根据语句和统计信息和算法分析优化query请求
+          表变更管理模块处理ddl（数据定义语言如create）和dml（数据操作语curd）语句
+          表维护模块表状态检查错误修复，优化和分析
+          系统状态管理模块将状态信息返回给用户
+          表管理器维护.frm文件，一个cache它cache各个表结构信息，tabl级别的锁管理
+          日志记录模块记录日志binlog,slow query log等
+          复制模块读取mastr binlog与slave io线程交互，slave io线程读取binlog西尔relay log，slave sql线程读取relay log解析成sql运行
+          存储引擎接口模块抽象化类实现存储引擎的可插拔
+
+过程分析：初始化模块初始化整个系统-->连接管理模块接手监听tcp/ip和socket启动完成准备接受请求
