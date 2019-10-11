@@ -1,0 +1,8 @@
+jdbc:代码多复杂，资源开启关闭有风险
+hibernate：在性能要求不高，场景简单开发效率高应用
+mybatis:灵活sql,配置映射
+
+mybatis组件：sqlsessionfactorybuilder、sqlsessionfactory、sqlsessio、sqlmapper(接口与xml映射关系)
+  配置读取到configuration类再让sqlsessionfactorybuilder从configuration单例读取信息创建sqlsessionfactory接口
+  sqlsession:获取映射器，通过命名空间和方法找到sql发送给数据库执行返回结果 ，注解方式，可读性，维护性差，工作量大
+  sql列名和pojo属性名一种会自动映射
