@@ -306,3 +306,41 @@ mysql的query优化：optimizer接收到query parser的sql进行分解分析，�
           索引扫描都是随机io，返回记录多性能差
           数据超过全表的15%就不适合用索引完成query
                               
+    join(多表）优化：小结果集驱动大，优化内层循环，被驱动表的查询字段加索引，join buffer加大
+    排序优化：用索引、设置max_length_sort_data大点、去除不必要的列、增加sort_buffer_size可以不分段不用临时表
+          group by优化：字段放在同一个索引中 通过索引完成分组order by null，不要在大结果集group by ,distinct
+          
+schema设计性能优化：
+          设计最影响性能
+          去除冗余数据，保持修改简单数据一致
+          高效的模型（表）设计：适度冗余
+                    大字段和访问访问频率低的字段拆分到另一张表
+                    水平拆分数据，把频繁访问的数据放到一张结构相同或相似的表
+          合适的数据类型：小的数据类型
+                        可以更快比较的数据类型
+                    减少关键表的记录数提供性能
+                    命名模块名+表
+                    
+mysql server 优化：日志设置优化
+                    binlog:
+                           sync binlog同步到磁盘的时间 0:让filesystem决定 n:n次事务后提交
+                           配置那些库记录binlog，哪些库和表复制，只记录留下有用的binlog（减少io量）去让slave复制
+                    slow query log
+                    
+                    query cache 适度使用，用于数据不怎么变的表
+                    
+                    max_connections:500~800
+                    max_allow_packet:最大包1~1024M
+                    back_log:等待的连接数,
+                    open_file_limit文件描述符限制
+                    threas_cache_size
+                    table cache：缓存文件描述符
+                    缓存索引 key cache
+                    innodb会缓存索引和数据 buffer_pool_size50%物理内存
+                    事务隔离级别
+                    磁盘顺序读写优于随机读写，对buffer pool数据的修改不会马上刷到磁盘，而是先写入日志，在日志被新日志覆盖之前写入磁盘此时数据的连续性会高，
+                    相当于批量减少随机写，提高整体性能，log buffer缓存到一定量在写入日志文件，
+                    不能更新索引否则会移动索引和数据
+                    索引空间要小:primary和secondary index ,提供主键查询，不更新主键
+                    将数据文件和事务日志文件放不同的磁盘减少争用提高性能
+                    autocommit为false
