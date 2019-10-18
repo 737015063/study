@@ -336,6 +336,7 @@ mysql server 优化：日志设置优化
                     threas_cache_size
                     table cache：缓存文件描述符
                     缓存索引 key cache
+                    innodb存储引擎优化：
                     innodb会缓存索引和数据 buffer_pool_size50%物理内存
                     事务隔离级别
                     磁盘顺序读写优于随机读写，对buffer pool数据的修改不会马上刷到磁盘，而是先写入日志，在日志被新日志覆盖之前写入磁盘此时数据的连续性会高，
@@ -344,3 +345,29 @@ mysql server 优化：日志设置优化
                     索引空间要小:primary和secondary index ,提供主键查询，不更新主键
                     将数据文件和事务日志文件放不同的磁盘减少争用提高性能
                     autocommit为false
+
+可扩展性设计：
+          scale out 横向扩展：成本低，不易遇到瓶颈增加机器，单节点故障对系统影响小，缺点：复杂度提高，维护成本提高
+          scale up则反之
+          通过集群或者切分成多个数据源扩展
+          事务相关最小性原则：1，合理切分尽可能使核心事务相关在一个server上
+                            2，大事务拆分成小事务，数据库保证小事务，程序控制小事务的整体事务完整性
+                            3.上面两种折中选择，事务越少越小越好
+          
+          数据一致性原则：非实时一致性，后续技术保证数据最终一致性，通过异步技术
+                         有些数据需要实时一致，有些通过技术不能保证最终一致性，这两种数据需要实时一致性与非实时数据隔离           
+                         可用性和安全性通过冗余机制保证
+         
+replication：异步复制的过程，由3个线程完成一个io线程（master端），一个sql线程和io线程（在slave端），需要master打开binlog，slave读取顺序的执行
+          
+          4步：1：slave io线程请求master 特定binlog特定位置之后的日志内容,
+               2：master读取信息返回信息和文件名称和读取的位置
+               3:slave接收写到relay log，同时记录文件名和位置在master.info
+               4:sql线程检测relay log增加的内容并解析relay log执行相同的query
+               
+               row level与statement level记录日志
+               
+复制架构：master-slave
+          master-master
+          
+          
