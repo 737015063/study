@@ -98,5 +98,20 @@ java栈溢出： -Xss设定栈容量，Stack Overflow ：超过栈允许的深�
                                   回收价值最大的region，region之间的对象引用，通过rememberset来避免全堆扫描，进行写操作会检查reference引用的对象
                                   是否处在不同的region，是就把引用信息记录到被引用的对象所处的region的rememberset中，进行回收在gcroot枚举范围
                                   加入rememberset，避免全堆扫描也可保证不遗漏引用信息
-                                  步骤和cms差不多：
-                                  
+                                  步骤和cms差不多：1初始标记：停顿线程让用户线程在正确的region产生对象
+                                                  2并发标记
+                                                  3最终标记：记录并发标记发生变化的记录到remembersetlogs并合并到rememberset
+                                                  4筛选回收会对region回收价值进行排序
+                                                  
+gc日志：full gc会stop the word，发生的区域名有收集器决定
+  对象优先分配到Eden区，空间不够触发minor gc,回收过程s1存不了会放到老年代，回收后还不够在老年代分配
+  大对象直接分配到老年代，长存活的将进入老年代，由对象年龄设置决定默认15
+  动态对象年龄判断
+  空间分配担保
+
+jps:虚拟机进程信息
+jstat：虚拟机进程统计信息：类装载，内存垃圾收集运行期编译状况
+jinfo:java配置信息：各项参数
+jmap:内存映像工具
+jhat:堆转储快照分析工具
+jstack：堆栈跟踪工具生成线程快照分析时间长或者死锁死循环等
