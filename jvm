@@ -217,14 +217,30 @@ volatile访问规则：1.保证变量对所有线程的可见性
                   2.禁止指令重排序，lock指令，相当于内存屏障，作用相当于把变量写入内存使其他cpu的cache失效
                   use前先load，load后use，read；assign后是store，store前是assign
                   
-原子性
-可见性
-有序性
-
+原子性:synchronized,8个原子命令
+可见性:volatile，synchronized，final
+有序性：synchronized，volatile
+先行发生原则：(A发生于B前B能看到A的结果)
+            程序次序原则：一个线程内，代码执行有序
+            管程（monitor）锁定原则：一个unlock先行与后续对这个锁的lock
+            volatile原则：对volatile的写先于后续对变量的读
+            线程启动原则：线程start先于线程内的执行操作
+            线程终止原则：线程的操作先于线程的终止检测
+            线程中断原则：interrupt先行于被检查到中断的代码
+            对象终结原则：对象的初始化先行finalize
+            传递性原则：a先于b，b先于c，则a先于c
+            时间先后顺序与先行原则没关系，并发安全以先行原则为准，不要受时间顺序影响
           
-          
-          
-          
+线程:比进程更轻量级的调度单位
+内核线程实现：内核线程的高级接口：轻量级进程实现；消耗内核资源，内核态和用户态切换代价大
+用户线程实现：不是建立在内核线程之上的线程
+用户线程和轻量级进程混合实现：用户线程(用户态创建切换代价小)和轻量级进程（负责和内核线程交互）N对M，（linuxWindows1对1线程模型）
+java线程调度：抢占式（分配cpu时间，yield方法可以让出），协同式由线程执行完切换
+线程状态转换：新建new尚未启动；
+             running等待cpu或正在运行
+             wait:无限期等待，需要其他线程唤醒，不分配cpu时间，object.wait，thread.join,locksupport.lock
+             timewaiting:有限期等待一定时间后系统自动唤醒，sleep，object.wait(time),locksupport.parknano
+             bllocked：阻塞状态，等待其他线程释放锁
           
           
           
